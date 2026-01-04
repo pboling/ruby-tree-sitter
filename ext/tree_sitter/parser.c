@@ -7,6 +7,7 @@ VALUE cParser;
 typedef struct {
   TSParser *data;
   size_t cancellation_flag;
+  uint64_t timeout_micros;
 } parser_t;
 
 static void parser_free(void *ptr) {
@@ -362,9 +363,8 @@ static VALUE parser_reset(VALUE self) {
  */
 static VALUE parser_get_timeout_micros(VALUE self) {
   // tree-sitter 0.26+ removed timeout_micros API
-  // Return 0 to indicate no timeout (was the default behavior)
-  (void)self;  // suppress unused parameter warning
-  return ULL2NUM(0);
+  // Return the stored value for backward compatibility
+  return ULL2NUM(unwrap(self)->timeout_micros);
 }
 
 /**
@@ -384,9 +384,8 @@ static VALUE parser_get_timeout_micros(VALUE self) {
  */
 static VALUE parser_set_timeout_micros(VALUE self, VALUE timeout) {
   // tree-sitter 0.26+ removed timeout_micros API
-  // This is a no-op for backward compatibility
-  (void)self;     // suppress unused parameter warning
-  (void)timeout;  // suppress unused parameter warning
+  // Store the value for backward compatibility but it won't affect parsing
+  unwrap(self)->timeout_micros = NUM2ULL(timeout);
   return Qnil;
 }
 
